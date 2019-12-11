@@ -72,7 +72,7 @@ class PhqKafkaProducer(object):
 
         self.output_topic = output_topic
 
-        self.producer = get_kafka_producer(
+        self._producer = get_kafka_producer(
             kafka_bootstrap_servers,
             kafka_producer_config
         )
@@ -85,7 +85,16 @@ class PhqKafkaProducer(object):
             packed_payload = self._svc_pack_kafka_payload(payload, [ref])
             batch.append({'key': _id, 'value': packed_payload})
         produce_batch(
-            self.producer,
+            self._producer,
             output_topic if output_topic else self.output_topic,
             batch
+        )
+
+    def produce(self, message: Message, output_topic=None):
+        _id, payload, ref = messages
+        packed_payload = self._svc_pack_kafka_payload(payload, [ref])
+        produce(
+            self._producer,
+            output_topic if output_topic else self.output_topic,
+            key=_id, value=pack_kafka_payload
         )
