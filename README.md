@@ -1,11 +1,10 @@
 # PredictHQ kafka python library
 
-The purpose of this library is to make easier the integration of kafka to a new services, and to propagate every related change to the way and configuration of kafka easily.
+The purpose of this library is to make easier the integration of kafka to a new services.
 
 It's a wrapper around [confluent-python-kafka](https://github.com/confluentinc/confluent-kafka-python) which is a wrapper arround [librdkafka](https://github.com/edenhill/librdkafka).
 
-To understand the choice of `confluent-python-kafka` over `kafka-python` please read this wiki page:
-[https://predicthq.atlassian.net/wiki/spaces/DEV/pages/48857662/Python+Kafka+Library+Investigation]
+This wrapper is producing and consumming json payload only.
 
 ## Getting started
 
@@ -61,12 +60,13 @@ if __name__ == '__name__':
     ) # init methods can also accept one extra parameter: kafka_producer_config.
 
     my_message_batch = [Message("some_id", {"data": "my message"}, [])]
+    # the last parameters of a message "refs", is use to track the lifecycle of a particular message.
     consumer.produce_batch(my_message_batch)
 ```
 
 ## Using only a consumer
 
-In several case, we will only need to consume message (like in the event-submitter services), the code in this case will look a lot like the one for KafkaPhqProcessor:
+If you only need a consumer:
 
 ```python
 from predicthq.kafka import PhqKafkaConsumer, Message
@@ -138,5 +138,5 @@ def pack_kafka_payload(svc, item, refs=[]): pass
 
 ## Note
 
-This library wrapper is using `enable.auto.commit : false`, to control when and why we want to commit messages, it is currently commiting after the successfull processing of a batch.
+This library wrapper is using `enable.auto.commit : false`, to control when and why we want to commit messages, it is currently commiting after a batch was processed successfully.
 If any error is raised during processing, the current batch will not be commited.
