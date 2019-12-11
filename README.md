@@ -119,21 +119,21 @@ For more tunning, here is all available configuration parameters which can be us
 To implement a really specific consumer/producer logic, some low level function are available:
 
 ```python
-get_kafka_consumer(bootstrap_servers: List[str], group_id: str, kafka_custom_config: Dict[str, str]) -> confluent_kafka.Consumer
+def get_kafka_consumer(bootstrap_servers: List[str], group_id: str, kafka_custom_config: Dict[str, str]) -> confluent_kafka.Consumer: pass
 
-format_batch_ref(batch_ref)
+def format_batch_ref(batch_ref): pass
 
-get_kafka_producer(bootstrap_servers: List[str], kafka_custom_config: Dict[str, str] = None) -> confluent_kafka.Producer
+def get_kafka_producer(bootstrap_servers: List[str], kafka_custom_config: Dict[str, str] = None) -> confluent_kafka.Producer: pass
 
-produce(producer: confluent_kafka.Producer, topic: str, partition: str = None, key: str = None, value: str = None)
+def produce(producer: confluent_kafka.Producer, topic: str, partition: str = None, key: str = None, value: str = None): pass
 
-produce_batch(producer: confluent_kafka.Producer, topic: str, batch: str, ignore_large_message_errors=False)
+def produce_batch(producer: confluent_kafka.Producer, topic: str, batch: str, ignore_large_message_errors=False): pass
 
-format_kafka_ref(ref)
+def format_kafka_ref(ref): pass
 
-unpack_kafka_payload(message)
+def unpack_kafka_payload(message): pass
 
-pack_kafka_payload(svc, item, refs=[])
+def pack_kafka_payload(svc, item, refs=[]): pass
 ```
 
 ## Note
