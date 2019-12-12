@@ -1,6 +1,6 @@
 import logging
 import json
-from typing import List, Dict
+from typing import List
 from functools import partial
 
 import confluent_kafka
@@ -65,7 +65,7 @@ def get_kafka_producer(bootstrap_servers: List[str], kafka_custom_config: Dict[s
 class Producer(object):
     def __init__(
         self, svc: str, output_topic: str,
-        kafka_bootstrap_servers: List[str], kafka_producer_config: Dict[str, str] = None
+        kafka_bootstrap_servers: List[str], **kafka_producer_config
     ):
         self.svc = svc
 
