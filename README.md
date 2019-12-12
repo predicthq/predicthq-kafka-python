@@ -99,3 +99,4 @@ def pack_kafka_payload(svc, item, refs=[]): pass
 
 This library wrapper is using `enable.auto.commit : false`, to control when and why we want to commit messages, it is currently commiting after a batch was processed successfully.
 If any error is raised during processing, the current batch will not be commited.
+This behaviour can be overriden using `kafka_consumer_config` by setting `kafka_consumer_config={'enable.auto.commit': 'true'}`.

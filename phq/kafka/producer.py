@@ -42,12 +42,12 @@ def produce(producer: confluent_kafka.Producer, topic: str, partition: str = Non
     on_delivery = partial(_on_delivery_error_handler, ignore_large_message_errors=False)
     data = {
         'topic': topic,
-        'key': message['key'].encode('utf-8') if message.get('key') else None,
-        'value': json.dumps(message['value']).encode('utf-8') if message.get('value') else None,
+        'key': key.encode('utf-8') if key else None,
+        'value': value.encode('utf-8') if value else None,
         'on_delivery': on_delivery
     }
-    if message.get('partition'):
-        data['partition'] = message['partition']
+    if partition:
+        data['partition'] = partition
     producer.produce(**data)
     producer.flush()
 
@@ -65,7 +65,7 @@ def get_kafka_producer(bootstrap_servers: List[str], kafka_custom_config: Dict[s
 class Producer(object):
     def __init__(
         self, svc: str, output_topic: str,
-        kafka_bootstrap_servers: List[str], **kafka_producer_config
+        kafka_bootstrap_servers: List[str], kafka_producer_config: Dict[str, str] = None
     ):
         self.svc = svc
 

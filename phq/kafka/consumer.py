@@ -49,12 +49,13 @@ def _group_messages(messages):
 class Consumer(object):
     def __init__(
         self, kafka_bootstrap_servers: List[str], input_topic: str, group_id: str,
-            batch_size: int, consumer_timeout_ms: int, **kafka_consumer_config
+            batch_size: int, consumer_timeout_ms: int, kafka_consumer_config: Dict[str, str] = None
     ):
         self.closed = False
 
         self._input_topic = input_topic
         self._consumer_group = group_id
+        self._auto_commit = kafka_consumer_config.get('enable.auto.commit', 'false') == 'true'
 
         self._consumer_timeout_ms = consumer_timeout_ms
         self._consumer_batch_size = batch_size
@@ -86,10 +87,12 @@ class Consumer(object):
 
                     if message.error():
                         error = message.error()
+                        # this is not really an error, we may have reach the end of the topic, we shouldn't raise and exception or stop consuming,
+                        # and keep polling until another batch is available.
                         if error.code() == confluent_kafka.KafkaError._PARTITION_EOF:
                             continue
                         else:
-                            raise confluent_kafka.KafkaException(msg.error())
+                            raise confluent_kafka.KafkaException(message.error())
 
                     payload, ref = unpack_kafka_payload(message)
                     message_id = ref['key']
@@ -106,9 +109,9 @@ class Consumer(object):
 
     def _get_kafka_messages(self):
         while True:
-            # The consumer interface doesn't obey the 'consumer_timeout_ms' consumer config.
             log.debug('Calling consumer.consume, timeout %(time_s)s',
                       {'time_s': self._consumer_timeout_ms})
+            # try to consume num_messages as soon as possible, if num_messages isn't reach until timeout, then it will consume what's available.
             messages = self._consumer.consume(num_messages=self._consumer_batch_size, timeout=self._consumer_timeout_ms / 1000)
             if messages:
                 yield messages
@@ -141,7 +144,8 @@ class Consumer(object):
                               {'batch_ref': format_batch_ref(batch_ref)})
                 raise
             else:
-                self._consumer.commit()
+                if not self._auto_commit:
+                    self._consumer.commit()
 
             messages_processed += batch_size
 
