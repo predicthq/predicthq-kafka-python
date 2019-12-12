@@ -1,14 +1,13 @@
 import logging
 import itertools
 import time
-from typing import List, Dict
 from collections import namedtuple
 from typing import List, Dict
 
 import confluent_kafka
 
 from .settings import KAFKA_CONSUMER_BASE_CONFIGURATION
-from .payload import unpack_kafka_payload
+from .payload import unpack_kafka_payload, Message
 
 
 log = log = logging.getLogger(__name__)
@@ -16,14 +15,12 @@ log = log = logging.getLogger(__name__)
 
 Tp = namedtuple('Tp', ['topic', 'partition'])
 
-Message = namedtuple('Message', ['id', 'payload', 'ref'])
-
 
 def get_kafka_consumer(bootstrap_servers: List[str], group_id: str, kafka_custom_config: Dict[str, str]) -> confluent_kafka.Consumer:
-
     configuration = KAFKA_CONSUMER_BASE_CONFIGURATION.copy()
     if kafka_custom_config:
         configuration.update(kafka_custom_config)
+
     configuration.update({
         'bootstrap.servers': ",".join(bootstrap_servers),
         'group.id': group_id,
@@ -49,26 +46,26 @@ def _group_messages(messages):
     return batch_ref
 
 
-class PhqKafkaConsumer(object):
+class Consumer(object):
     def __init__(
-        self, input_topic: str, group_id: str, batch_size: int, consumer_timeout_ms: int,
-        kafka_bootstrap_servers: List[str], kafka_consumer_config: Dict[str, str] = None
+        self, kafka_bootstrap_servers: List[str], input_topic: str, group_id: str,
+            batch_size: int, consumer_timeout_ms: int, **kafka_consumer_config
     ):
         self.closed = False
 
-        self.input_topic = input_topic
+        self._input_topic = input_topic
+        self._consumer_group = group_id
 
         self._consumer_timeout_ms = consumer_timeout_ms
-
-        self._consumer_group = group_id
         self._consumer_batch_size = batch_size
+
         self._consumer = get_kafka_consumer(
             kafka_bootstrap_servers,
             self._consumer_group,
             kafka_consumer_config
         )
 
-        self._consumer.subscribe([self.input_topic])
+        self._consumer.subscribe([self._input_topic])
 
     def _format_message_batch(self, kafka_messages):
         messages = []
@@ -77,7 +74,7 @@ class PhqKafkaConsumer(object):
             topic = tp.topic
             partition = tp.partition
 
-            if topic == self.input_topic:
+            if topic == self._input_topic:
                 if topic not in batch_ref:
                     batch_ref[topic] = {}
 
@@ -121,7 +118,9 @@ class PhqKafkaConsumer(object):
             self._consumer.close()
             self.closed = True
 
-    def _process(self, producer=None):
+    def process(self, func_handler):
+        if not callable(func_handler):
+            raise ValueError(f'Function handler is expected but got {type(func_handler)}')
 
         log.info('Starting processor.')
 
@@ -135,9 +134,8 @@ class PhqKafkaConsumer(object):
                      {'batch_ref': format_batch_ref(batch_ref), 'batch': batch_size})
 
             try:
-                messages_to_produce = self.process_messages(messages)
-                if producer:
-                    producer.produce_batch(messages_to_produce)
+                self.process_messages(messages)
+
             except Exception as e:
                 log.exception('[%(batch_ref)s] Encountered exception while processing batch of messages.',
                               {'batch_ref': format_batch_ref(batch_ref)})
@@ -155,9 +153,3 @@ class PhqKafkaConsumer(object):
 
         if messages_processed > 0:
             log.info('Processed %(total)d messages', {'total': messages_processed})
-
-    def process(self):
-        self._process(producer=None)
-
-    def process_messages(self, messages: List[Message]):
-        raise NotImplementedError("subclass should implement `{}`".format('process_messages'))

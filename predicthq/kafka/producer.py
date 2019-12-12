@@ -5,8 +5,7 @@ from functools import partial
 
 import confluent_kafka
 
-from .consumer import Message
-from .payload import pack_kafka_payload
+from .payload import pack_kafka_payload, Message
 from .settings import KAFKA_PRODUCER_BASE_CONFIGURATION
 
 log = logging.getLogger(__name__)
@@ -63,7 +62,7 @@ def get_kafka_producer(bootstrap_servers: List[str], kafka_custom_config: Dict[s
     return confluent_kafka.Producer(configuration, logger=log)
 
 
-class PhqKafkaProducer(object):
+class Producer(object):
     def __init__(
         self, svc: str, output_topic: str,
         kafka_bootstrap_servers: List[str], kafka_producer_config: Dict[str, str] = None

@@ -2,10 +2,9 @@ import sys
 from collections import namedtuple
 
 from .calc_ref_latencies import calc_ref_latencies
-from .consumer import PhqKafkaConsumer, get_kafka_consumer, Message
-from .producer import get_kafka_producer, produce, produce_batch, PhqKafkaProducer
-from .payload import format_kafka_ref, unpack_kafka_payload, pack_kafka_payload
-from .phq_kafka_processor import PhqKafkaProcessor
+from .consumer import Consumer, get_kafka_consumer
+from .producer import get_kafka_producer, produce, produce_batch, Producer
+from .payload import format_kafka_ref, unpack_kafka_payload, pack_kafka_payload, Message
 from confluent_kafka import KafkaException
 
 # Allow higher recursion as some messages have very long hists,
