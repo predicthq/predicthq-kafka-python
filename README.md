@@ -8,89 +8,48 @@ This wrapper is producing and consumming json payload only.
 
 ## Getting started
 
-To implement a class processor which consume and produce messages you can use the `PhqKafkaProcessor` class:
-
-```python
-from predicthq.kafka import PhqKafkaProcessor, Message
-
-class CustomProcessor(PhqKafkaProcessor):
-
-    def process_messages(self, messages: List[Message]) -> List[Message]:
-        for message in messages:
-            print(message.id)
-            print(message.payload) # this is a dict
-        return [Message("some_id", {"data": "my message"}, [])]
-
-if __name__ == "__name__":
-
-    batch_size = 100
-    consumer_timeout_ms = 1000
-    kafka_bootstrap_server = ['kafka:9092']
-
-    consumer = CustomProcessor(
-        "my-service-name", "input-topic", "output-topic",
-        "group_id", batch_size, consumer_timeout_ms, ['kafka:9092']
-    ) # init methods can also accept two extra parameter: kafka_consumer_config, kafka_producer_config
-
-    # to start processing:
-    consumer.process()
-
-    # you can also produce message to another topic if necessary:
-    my_message_batch = [Message("some_other_id", {"data": "my message"}, [])]
-    consumer.produce_batch(my_message_batch, "other-topic")
-
-```
-
-Each class inheriting from PhqKafkaProducer must have a process_messages methods which will handle the received messages and return a list of new Message object.
-
-## Using only a producer
+### Using only a producer
 
 In some cases you may only need to produce message, you can then use the `PhqKafkaProducer` class:
 
 ```python
-from predicthq.kafka import PhqKafkaProducer, Message
+from predicthq.kafka import Producer, Message
 
 if __name__ == '__name__':
     batch_size = 100
     consumer_timeout_ms = 1000
     kafka_bootstrap_server = ['kafka:9092']
 
-    consumer = PhqKafkaProducer(
+    producer = Producer(
         'my-service-name', 'output-topic', ['kafka:9092']
     ) # init methods can also accept one extra parameter: kafka_producer_config.
 
     my_message_batch = [Message("some_id", {"data": "my message"}, [])]
     # the last parameters of a message "refs", is use to track the lifecycle of a particular message.
-    consumer.produce_batch(my_message_batch)
+    producer.produce_batch(my_message_batch)
 ```
 
 ## Using only a consumer
 
 If you only need a consumer:
-
 ```python
-from predicthq.kafka import PhqKafkaConsumer, Message
+from predicthq.kafka import Consumer, Producer, Message
 
-class CustomConsumer(PhqKafkaConsumer):
+batch_size = 100
+consumer_timeout_ms = 1000
+kafka_bootstrap_server = ['kafka:9092']
 
-    def process_messages(self, messages: List[Message]):
-        for message in messages:
-            print(message.id)
-            print(message.payload) # this is a dict
+def process_messages(messages: List[Message]):
+    output_msgs = []
+    for message in messages:
+        print(message.id)
+        print(message.payload) # this is a dict
+        output_msgs.append(message)
+        
 
-if __name__ == "__name__":
+my_consumer = Consumer(['kafka:9092'], "input-topic", "group_id", batch_size, consumer_timeout_ms)
+my_consumer.process(process_messages)
 
-    batch_size = 100
-    consumer_timeout_ms = 1000
-    kafka_bootstrap_server = ['kafka:9092']
-
-    consumer = CustomConsumer(
-        "input-topic", "group_id",
-        batch_size, consumer_timeout_ms, ['kafka:9092']
-    ) # init methods can also accept an extra parameter: kafka_consumer_config.
-
-    # to start processing:
-    consumer.process()
 ```
 
 ## Exception
