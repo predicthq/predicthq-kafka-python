@@ -1,4 +1,4 @@
-# PredictHQ kafka python library
+# PHQ kafka python library
 
 The purpose of this library is to make easier the integration of kafka to a new services.
 
@@ -13,7 +13,7 @@ This wrapper is producing and consumming json payload only.
 In some cases you may only need to produce message, you can then use the `PhqKafkaProducer` class:
 
 ```python
-from predicthq.kafka import Producer, Message
+from phq.kafka import Producer, Message
 
 if __name__ == '__name__':
     batch_size = 100
@@ -33,7 +33,7 @@ if __name__ == '__name__':
 
 If you only need a consumer:
 ```python
-from predicthq.kafka import Consumer, Producer, Message
+from phq.kafka import Consumer, Producer, Message
 
 batch_size = 100
 consumer_timeout_ms = 1000
@@ -57,7 +57,7 @@ my_consumer.process(process_messages)
 To import and catch exception throw by `confluent_kafka`, simply import KafkaException:
 
 ```python
-from predicthq.kafka import KafkaException
+from phq.kafka import KafkaException
 ```
 
 ## Configuration
