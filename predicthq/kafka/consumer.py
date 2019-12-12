@@ -134,7 +134,7 @@ class Consumer(object):
                      {'batch_ref': format_batch_ref(batch_ref), 'batch': batch_size})
 
             try:
-                self.process_messages(messages)
+                func_handler(messages)
 
             except Exception as e:
                 log.exception('[%(batch_ref)s] Encountered exception while processing batch of messages.',
