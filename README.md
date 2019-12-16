@@ -4,13 +4,36 @@ The purpose of this library is to make easier the integration of kafka to a new 
 
 It's a wrapper around [confluent-python-kafka](https://github.com/confluentinc/confluent-kafka-python) which is a wrapper arround [librdkafka](https://github.com/edenhill/librdkafka).
 
-This wrapper is producing and consumming json payload only.
+This wrapper is producing and consuming json payload only.
+
+## Note
+
+This library wrapper is using `enable.auto.commit : false`, to control when and why we want to commit messages, it is currently commiting after a batch was processed successfully.
+If any error is raised during processing, the current batch will not be committed.
+
+## Prerequisites
+
+### Snappy compression
+
+This library is using Snappy to compress message before sending it to Kafka topic.
+
+Install snappy:
+
+```bash
+> apt-get install -y libsnappy-dev
+```
+
+Or on MacOSX:
+
+```bash
+> brew install snappy
+```
 
 ## Getting started
 
 ### Using only a producer
 
-In some cases you may only need to produce message, you can then use the `PhqKafkaProducer` class:
+In some cases you may only need to produce message, you can then use the `Producer` class:
 
 ```python
 from phq.kafka import Producer, Message
@@ -39,7 +62,7 @@ batch_size = 100
 consumer_timeout_ms = 1000
 kafka_bootstrap_server = ['kafka:9092']
 
-def process_messages(messages: List[Message]):
+def process_messages(messages):
     output_msgs = []
     for message in messages:
         print(message.id)
@@ -95,8 +118,3 @@ def unpack_kafka_payload(message): pass
 def pack_kafka_payload(svc, item, refs=[]): pass
 ```
 
-## Note
-
-This library wrapper is using `enable.auto.commit : false`, to control when and why we want to commit messages, it is currently commiting after a batch was processed successfully.
-If any error is raised during processing, the current batch will not be commited.
-This behaviour can be overriden using `kafka_consumer_config` by setting `kafka_consumer_config={'enable.auto.commit': 'true'}`.

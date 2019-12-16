@@ -1,5 +1,4 @@
 import logging
-import json
 from typing import List, Dict
 from functools import partial
 
@@ -11,7 +10,7 @@ from .settings import producer_base_configuration
 log = logging.getLogger(__name__)
 
 
-def _on_delivery_error_handler(err, ignore_large_message_errors=False):
+def _on_delivery_error_handler(err, message, ignore_large_message_errors=False):
     if err:
         if err.code() == confluent_kafka.KafkaError.MSG_SIZE_TOO_LARGE and not ignore_large_message_errors:
             raise confluent_kafka.KafkaException(err)
@@ -38,9 +37,9 @@ def _produce(producer: confluent_kafka.Producer, topic: str, partition: str = No
     producer.produce(**data)
 
 
-def produce_batch(producer: confluent_kafka.Producer, topic: str, batch: List[Dict], ignore_large_message_errors=False):
+def produce_batch(producer: confluent_kafka.Producer, topic: str, batch: List[Dict]):
     for message in batch:
-        _produce(producer, topic, message.get('partition'), message.get('key'), message.get('value') )
+        _produce(producer, topic, message.get('partition'), message.get('key'), message.get('value'))
     producer.flush()
 
 
@@ -82,4 +81,4 @@ class Producer:
 
         _id, payload, ref = message
         packed_payload = self._svc_pack_kafka_payload(payload, [ref])
-        produce(self._producer, output_topic, key=_id, value=json.dumps(packed_payload))
+        produce(self._producer, output_topic, key=_id, value=packed_payload)

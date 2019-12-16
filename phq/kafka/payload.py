@@ -75,7 +75,7 @@ def unpack_kafka_payload(message):
 
 
 def pack_kafka_payload(svc, item, refs):
-    return {
+    payload = {
         'item': item,
         'hist': {
             'svc': svc,
@@ -83,3 +83,4 @@ def pack_kafka_payload(svc, item, refs):
             'refs': refs or []
         }
     }
+    return json.dumps(payload)
