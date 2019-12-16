@@ -1,6 +1,4 @@
 import sys
-from collections import namedtuple
-
 from .calc_ref_latencies import calc_ref_latencies
 from .consumer import Consumer, get_kafka_consumer
 from .producer import get_kafka_producer, produce, produce_batch, Producer

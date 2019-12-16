@@ -2,22 +2,23 @@ import logging
 import itertools
 import time
 from collections import namedtuple
-from typing import List, Dict
+from typing import List, Dict, Any
 
 import confluent_kafka
 
-from .settings import KAFKA_CONSUMER_BASE_CONFIGURATION
+from .settings import consumer_base_configuration
 from .payload import unpack_kafka_payload, Message
 
 
-log = log = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
-Tp = namedtuple('Tp', ['topic', 'partition'])
+TopicPartition = namedtuple('TopicPartition', ['topic', 'partition'])
 
 
 def get_kafka_consumer(bootstrap_servers: List[str], group_id: str, kafka_custom_config: Dict[str, str]) -> confluent_kafka.Consumer:
-    configuration = KAFKA_CONSUMER_BASE_CONFIGURATION.copy()
+    configuration = consumer_base_configuration()
+
     if kafka_custom_config:
         configuration.update(kafka_custom_config)
 
@@ -39,7 +40,7 @@ def _group_messages(messages):
     batch_ref = {}
     for topic, m_topic in itertools.groupby(messages, lambda x: x.topic()):
         for partition, m_partition in itertools.groupby(m_topic, lambda x: x.partition()):
-            tp = Tp(topic, partition)
+            tp = TopicPartition(topic, partition)
             if tp not in batch_ref:
                 batch_ref[tp] = []
             batch_ref[tp] += list(m_partition)
@@ -47,24 +48,25 @@ def _group_messages(messages):
 
 
 class Consumer(object):
-    def __init__(
-        self, kafka_bootstrap_servers: List[str], input_topic: str, group_id: str,
-            batch_size: int, consumer_timeout_ms: int, kafka_consumer_config: Dict[str, str] = None
-    ):
-        self.closed = False
+    def __init__(self, kafka_bootstrap_servers: List[str], input_topic: str, consumer_group: str,
+                 batch_size: int, consumer_timeout_ms: int, kafka_consumer_config: Dict[str, Any] = None):
 
+        self.closed = False
         self._input_topic = input_topic
-        self._consumer_group = group_id
-        self._auto_commit = kafka_consumer_config.get('enable.auto.commit', 'false') == 'true'
+        self._consumer_group = consumer_group
+
+        kafka_consumer_config = kafka_consumer_config.copy()
+        if 'enable.auto.commit' in kafka_consumer_config:
+            # We don't allow the consumer service to set auto.commit setting.
+            # This wrapper library will handle the commit in a more controlled manner.
+            del kafka_consumer_config['enable.auto.commit']
 
         self._consumer_timeout_ms = consumer_timeout_ms
         self._consumer_batch_size = batch_size
 
-        self._consumer = get_kafka_consumer(
-            kafka_bootstrap_servers,
-            self._consumer_group,
-            kafka_consumer_config
-        )
+        self._consumer = get_kafka_consumer(kafka_bootstrap_servers,
+                                            self._consumer_group,
+                                            kafka_consumer_config)
 
         self._consumer.subscribe([self._input_topic])
 
@@ -144,7 +146,7 @@ class Consumer(object):
                               {'batch_ref': format_batch_ref(batch_ref)})
                 raise
             else:
-                if not self._auto_commit:
+                if self._consumer_group:
                     self._consumer.commit()
 
             messages_processed += batch_size

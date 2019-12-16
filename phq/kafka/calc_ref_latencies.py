@@ -1,3 +1,6 @@
+import rfc3339
+
+
 def _build_hist_stage_timings(hist, timings=None):
     if timings is None:
         timings = []

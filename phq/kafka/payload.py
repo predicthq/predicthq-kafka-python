@@ -4,9 +4,7 @@ import logging
 
 import rfc3339
 
-
 log = logging.getLogger(__name__)
-
 
 Message = namedtuple('Message', ['id', 'payload', 'ref'])
 
@@ -76,12 +74,12 @@ def unpack_kafka_payload(message):
     return item, ref
 
 
-def pack_kafka_payload(svc, item, refs=[]):
+def pack_kafka_payload(svc, item, refs):
     return {
         'item': item,
         'hist': {
             'svc': svc,
             'dt': rfc3339.datetimetostr(rfc3339.now()),
-            'refs': refs
+            'refs': refs or []
         }
     }
