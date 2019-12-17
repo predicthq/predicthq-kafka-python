@@ -49,19 +49,17 @@ def _group_messages(messages):
 
 class Consumer(object):
     def __init__(self, kafka_bootstrap_servers: List[str], input_topic: str, consumer_group: str,
-                 batch_size: int, consumer_timeout_ms: int, kafka_consumer_config: Dict[str, Any] = None):
+                 batch_size: int, consumer_timeout_ms: int, commit_message: bool = False, kafka_consumer_config: Dict[str, Any] = None):
 
         self.closed = False
         self._input_topic = input_topic
         self._consumer_group = consumer_group
-        self._auto_commit = False
+        self._auto_commit = commit_message
 
         if kafka_consumer_config:
             kafka_consumer_config = kafka_consumer_config.copy()
             if 'enable.auto.commit' in kafka_consumer_config:
-                # We don't want to rely on the native Kafka library to do the auto-commit.
-                # This wrapper library will handle the commit in a more controlled manner.
-                self._auto_commit = kafka_consumer_config['enable.auto.commit']
+                log.warn("'enable.auto.commit' option is not supported by 'phq-python-kafka' library, see the documentation")
                 del kafka_consumer_config['enable.auto.commit']
 
         self._consumer_timeout_ms = consumer_timeout_ms
