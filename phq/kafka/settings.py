@@ -7,7 +7,8 @@ def consumer_base_configuration():
         'session.timeout.ms': '10000',
         'max.poll.interval.ms': '300000',
         'queued.max.messages.kbytes': '100000',  # Internal queue size in Kbytes which determine the size of the internal buffer
-        'enable.auto.commit': False # Following default convention
+        'enable.auto.commit': False, # Following default convention
+        'log_level': 3  # ERROR and above
     }.copy()
 
 

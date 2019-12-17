@@ -54,12 +54,15 @@ class Consumer(object):
         self.closed = False
         self._input_topic = input_topic
         self._consumer_group = consumer_group
+        self._auto_commit = False
 
-        kafka_consumer_config = kafka_consumer_config.copy()
-        if 'enable.auto.commit' in kafka_consumer_config:
-            # We don't allow the consumer service to set auto.commit setting.
-            # This wrapper library will handle the commit in a more controlled manner.
-            del kafka_consumer_config['enable.auto.commit']
+        if kafka_consumer_config:
+            kafka_consumer_config = kafka_consumer_config.copy()
+            if 'enable.auto.commit' in kafka_consumer_config:
+                # We don't want to rely on the native Kafka library to do the auto-commit.
+                # This wrapper library will handle the commit in a more controlled manner.
+                self._auto_commit = kafka_consumer_config['enable.auto.commit']
+                del kafka_consumer_config['enable.auto.commit']
 
         self._consumer_timeout_ms = consumer_timeout_ms
         self._consumer_batch_size = batch_size
@@ -127,7 +130,7 @@ class Consumer(object):
         if not callable(func_handler):
             raise ValueError(f'Function handler is expected but got {type(func_handler)}')
 
-        log.info('Starting processor.')
+        log.info('Starting Kafka consumer.')
 
         messages_processed = 0
 
@@ -146,7 +149,7 @@ class Consumer(object):
                               {'batch_ref': format_batch_ref(batch_ref)})
                 raise
             else:
-                if self._consumer_group:
+                if self._auto_commit:
                     self._consumer.commit()
 
             messages_processed += batch_size
