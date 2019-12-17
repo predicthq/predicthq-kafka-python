@@ -59,7 +59,7 @@ class Consumer(object):
         if kafka_consumer_config:
             kafka_consumer_config = kafka_consumer_config.copy()
             if 'enable.auto.commit' in kafka_consumer_config:
-                log.warn("'enable.auto.commit' option is not supported by 'phq-python-kafka' library, see the documentation")
+                log.warning("'enable.auto.commit' option is not supported by 'phq-python-kafka' library, see the documentation")
                 del kafka_consumer_config['enable.auto.commit']
 
         self._consumer_timeout_ms = consumer_timeout_ms
