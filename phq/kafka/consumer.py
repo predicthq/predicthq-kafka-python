@@ -105,7 +105,7 @@ class Consumer(object):
 
             else:
                 log.warning('Received %(batch)s messages for unknown topic %(unknown_topic)s (expected %(expected_topic)s). Skipping.',
-                            {'batch': len(batch), 'unknown_topic': topic, 'expected_topics': self.input_topic})
+                            {'batch': len(batch), 'unknown_topic': topic, 'expected_topics': self._input_topic})
                 continue
 
         return messages, batch_ref
