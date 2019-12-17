@@ -78,7 +78,7 @@ class Consumer(object):
             topic = tp.topic
             partition = tp.partition
 
-            if topic == self._input_topic:
+            if not topic or topic == self._input_topic:
                 if topic not in batch_ref:
                     batch_ref[topic] = {}
 
@@ -105,7 +105,7 @@ class Consumer(object):
 
             else:
                 log.warning('Received %(batch)s messages for unknown topic %(unknown_topic)s (expected %(expected_topic)s). Skipping.',
-                            {'batch': len(batch), 'unknown_topic': topic, 'expected_topics': self._input_topic})
+                            {'batch': len(batch), 'unknown_topic': topic, 'expected_topic': self._input_topic})
                 continue
 
         return messages, batch_ref
