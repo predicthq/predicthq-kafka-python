@@ -49,7 +49,7 @@ def _group_messages(messages):
 
 class Consumer(object):
     def __init__(self, kafka_bootstrap_servers: List[str], input_topic: str, consumer_group: str,
-                 batch_size: int, consumer_timeout_ms: int, commit_message: bool = False, kafka_consumer_config: Dict[str, Any] = None):
+                 batch_size: int, consumer_timeout_ms: int, commit_message: bool = True, kafka_consumer_config: Dict[str, Any] = None):
 
         self.closed = False
         self._input_topic = input_topic
