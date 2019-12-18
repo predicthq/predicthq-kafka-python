@@ -1,6 +1,6 @@
 def consumer_base_configuration():
     return {
-        'auto.offset.reset': 'earliest',
+        'auto.offset.reset': 'latest',
         'fetch.max.bytes': '1048576',
         'request.timeout.ms': '305000',
         'heartbeat.interval.ms': '3000',
