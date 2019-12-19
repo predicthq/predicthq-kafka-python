@@ -31,7 +31,7 @@ Or on MacOSX:
 
 ## Getting started
 
-### Using only a producer
+### Producer
 
 In some cases you may only need to produce message, you can then use the `Producer` class:
 
@@ -39,24 +39,19 @@ In some cases you may only need to produce message, you can then use the `Produc
 from phq.kafka import Producer, Message
 
 if __name__ == '__name__':
-    batch_size = 100
-    consumer_timeout_ms = 1000
-    kafka_bootstrap_server = ['kafka:9092']
-
-    producer = Producer(
-        'my-service-name', 'output-topic', ['kafka:9092']
-    ) # init methods can also accept one extra parameter: kafka_producer_config.
+    # init methods can also accept one extra parameter: kafka_producer_config.
+    producer = Producer('my-service-name', ['kafka:9092']) 
 
     my_message_batch = [Message("some_id", {"data": "my message"}, [])]
     # the last parameters of a message "refs", is use to track the lifecycle of a particular message.
     producer.produce_batch(my_message_batch)
 ```
 
-## Using only a consumer
+## Consumer
 
 If you only need a consumer:
 ```python
-from phq.kafka import Consumer, Producer, Message
+from phq.kafka import Consumer, Message
 
 batch_size = 100
 consumer_timeout_ms = 1000
@@ -70,9 +65,8 @@ def process_messages(messages):
         output_msgs.append(message)
         
 
-my_consumer = Consumer(['kafka:9092'], "input-topic", "group_id", batch_size, consumer_timeout_ms)
+my_consumer = Consumer(['kafka:9092'], 'input-topic', 'group_id', batch_size, consumer_timeout_ms)
 my_consumer.process(process_messages)
-
 ```
 
 ## Exception
