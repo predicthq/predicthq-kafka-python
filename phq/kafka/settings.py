@@ -6,7 +6,7 @@ def consumer_base_configuration():
         'heartbeat.interval.ms': 3000,
         'session.timeout.ms': 10000,
         'max.poll.interval.ms': 300000,
-        'queued.max.messages.kbytes': 100000,  # Internal queue size in Kbytes which determine the size of the internal buffer
+        'queued.max.messages.kbytes': 50000,  # Internal queue size in Kbytes which determine the size of the internal buffer
         'enable.auto.commit': False # Following default convention
     }.copy()
 
