@@ -11,6 +11,8 @@ This wrapper is producing and consuming json payload only.
 This library wrapper is using `enable.auto.commit : false`, to control when and why we want to commit messages, it is currently commiting after a batch was processed successfully.
 If any error is raised during processing, the current batch will not be committed.
 
+See [Kafka Consumer Config doc](https://docs.confluent.io/current/installation/configuration/consumer-configs.html) for more information about all the available Kafka consumer settings.
+
 ## Prerequisites
 
 ### Snappy compression
