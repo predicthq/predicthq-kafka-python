@@ -6,7 +6,7 @@ import rfc3339
 
 log = logging.getLogger(__name__)
 
-Message = namedtuple('Message', ['id', 'payload', 'ref'])
+Message = namedtuple('Message', ['id', 'payload', 'refs'])
 
 
 def _long_hist(hist, depth=0, max_depth=100):
@@ -52,8 +52,8 @@ def format_kafka_ref(ref):
     return '{}:{}:{}:{}'.format(ref['topic'], ref['partition'], ref['offset'], ref['key'])
 
 
-def unpack_kafka_payload(message):
-    value = message.value()
+def unpack_kafka_payload(payload):
+    value = payload.value()
     if not value:
         return None
     data = json.loads(value.decode('utf-8'))
@@ -65,7 +65,7 @@ def unpack_kafka_payload(message):
         long_hist_truncated = True
         hist = None
 
-    ref = _get_kafka_ref(message, hist)
+    ref = _get_kafka_ref(payload, hist)
 
     if long_hist_truncated:
         log.warning('[%(ref)s] Message has a very long history. Truncated.',
