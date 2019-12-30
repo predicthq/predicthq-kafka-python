@@ -70,8 +70,8 @@ class Producer:
             raise ValueError(f'Invalid Kafka output topic name: {output_topic}')
 
         batch = [
-            {'key': _id, 'value': self._svc_pack_kafka_payload(payload, [ref])}
-            for _id, payload, ref in messages
+            {'key': _id, 'value': self._svc_pack_kafka_payload(payload, refs)}
+            for _id, payload, refs in messages
         ]
         produce_batch(self._producer, output_topic, batch)
 
@@ -79,6 +79,6 @@ class Producer:
         if not output_topic:
             raise ValueError(f'Invalid Kafka output topic name: {output_topic}')
 
-        _id, payload, ref = message
-        packed_payload = self._svc_pack_kafka_payload(payload, [ref])
+        _id, payload, refs = message
+        packed_payload = self._svc_pack_kafka_payload(payload, refs)
         produce(self._producer, output_topic, key=_id, value=packed_payload)
