@@ -136,7 +136,7 @@ class Consumer(object):
             messages, batch_ref = self._format_message_batch(kafka_messages)
             batch_size = len(messages)
             start_ms = time.time() * 1000
-            log.info('[%(batch_ref)s] Starting processing batch of %(batch)d messages.',
+            log.debug('[%(batch_ref)s] Starting processing batch of %(batch)d messages.',
                      {'batch_ref': format_batch_ref(batch_ref), 'batch': batch_size})
 
             try:
@@ -155,8 +155,8 @@ class Consumer(object):
             if batch_size:
                 end_ms = time.time() * 1000
                 time_ms = end_ms - start_ms
-                log.info('Processed batch of %(batch)d messages in %(time_ms)dms. %(total)d total.',
+                log.debug('Processed batch of %(batch)d messages in %(time_ms)dms. %(total)d total.',
                          {'batch': batch_size, 'time_ms': time_ms, 'total': messages_processed})
 
         if messages_processed > 0:
-            log.info('Processed %(total)d messages', {'total': messages_processed})
+            log.debug('Processed %(total)d messages', {'total': messages_processed})
