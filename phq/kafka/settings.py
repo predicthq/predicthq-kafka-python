@@ -8,7 +8,7 @@ def consumer_base_configuration():
         'max.poll.interval.ms': 300000,
         'queued.max.messages.kbytes': 10000,  # Internal queue size in Kbytes which determine the size of the internal buffer per topic/partition
         'enable.auto.commit': False,  # Following default convention
-        'queued.min.messages': 10000  # overide default configuration of 100000
+        'queued.min.messages': 100  # overide default configuration of 100000
     }.copy()
 
 
