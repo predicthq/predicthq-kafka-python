@@ -6,7 +6,7 @@ import rfc3339
 
 log = logging.getLogger(__name__)
 
-Message = namedtuple('Message', ['id', 'payload', 'refs'])
+Message = namedtuple('Message', ['id', 'payload', 'ref'])
 
 
 def _long_hist(hist, depth=0, max_depth=100):
@@ -74,13 +74,13 @@ def unpack_kafka_payload(payload):
     return item, ref
 
 
-def pack_kafka_payload(svc, item, refs):
+def pack_kafka_payload(svc, item, ref):
     payload = {
         'item': item,
         'hist': {
             'svc': svc,
             'dt': rfc3339.datetimetostr(rfc3339.now()),
-            'refs': refs or []
+            'refs': [ref] if ref else []
         }
     }
     return json.dumps(payload)
