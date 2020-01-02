@@ -65,12 +65,22 @@ class Producer:
         self._svc_pack_kafka_payload = partial(pack_kafka_payload, svc)
         self._producer = get_kafka_producer(kafka_bootstrap_servers, kafka_producer_config)
 
+    @staticmethod
+    def _format_ref(ref):
+        if isinstance(ref, list):
+            return ref
+
+        if not ref:
+            return []
+
+        return [ref]
+
     def produce_batch(self, output_topic: str, messages: List[Message]):
         if not output_topic:
             raise ValueError(f'Invalid Kafka output topic name: {output_topic}')
 
         batch = [
-            {'key': _id, 'value': self._svc_pack_kafka_payload(payload, ref)}
+            {'key': _id, 'value': self._svc_pack_kafka_payload(payload, self._format_ref(ref))}
             for _id, payload, ref in messages
         ]
         produce_batch(self._producer, output_topic, batch)
@@ -80,5 +90,5 @@ class Producer:
             raise ValueError(f'Invalid Kafka output topic name: {output_topic}')
 
         _id, payload, ref = message
-        packed_payload = self._svc_pack_kafka_payload(payload, ref)
+        packed_payload = self._svc_pack_kafka_payload(payload, self._format_ref(ref))
         produce(self._producer, output_topic, key=_id, value=packed_payload)

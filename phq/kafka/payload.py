@@ -74,13 +74,13 @@ def unpack_kafka_payload(payload):
     return item, ref
 
 
-def pack_kafka_payload(svc, item, ref):
+def pack_kafka_payload(svc, item, refs):
     payload = {
         'item': item,
         'hist': {
             'svc': svc,
             'dt': rfc3339.datetimetostr(rfc3339.now()),
-            'refs': [ref] if ref else []
+            'refs': refs or []
         }
     }
     return json.dumps(payload)
