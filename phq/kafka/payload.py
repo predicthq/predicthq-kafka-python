@@ -6,7 +6,7 @@ import rfc3339
 
 log = logging.getLogger(__name__)
 
-Message = namedtuple('Message', ['id', 'payload', 'refs'])
+Message = namedtuple('Message', ['id', 'payload', 'ref'])
 
 
 def _long_hist(hist, depth=0, max_depth=100):
