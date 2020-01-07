@@ -67,7 +67,7 @@ def process_messages(messages):
         output_msgs.append(message)
         
 
-my_consumer = Consumer(['kafka:9092'], 'input-topic', 'group_id', batch_size, consumer_timeout_ms)
+my_consumer = Consumer('my-service-name', ['kafka:9092'], 'input-topic', 'group_id', batch_size, consumer_timeout_ms)
 my_consumer.process(process_messages)
 ```
 
