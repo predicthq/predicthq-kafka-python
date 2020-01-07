@@ -11,7 +11,7 @@ with open('VERSION') as f:
     version = f.read().strip()
 
 setup(
-    name='predicthq-kafka-python',
+    name='phq-kafka-python',
     version=version,
     description='Wrapper and utils around confluent-python-kafka',
     long_description=readme,
