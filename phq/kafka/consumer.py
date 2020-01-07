@@ -8,7 +8,7 @@ import confluent_kafka
 
 from .settings import consumer_base_configuration
 from .payload import unpack_kafka_payload, Message
-
+from .metrics import consumer_time_metric, consumer_count_metric
 
 log = logging.getLogger(__name__)
 
@@ -48,8 +48,13 @@ def _group_messages(messages):
 
 
 class Consumer(object):
-    def __init__(self, kafka_bootstrap_servers: List[str], input_topic: str, consumer_group: str,
+    def __init__(self, svc_name: str, kafka_bootstrap_servers: List[str], input_topic: str, consumer_group: str,
                  batch_size: int, consumer_timeout_ms: int, commit_message: bool = True, kafka_consumer_config: Dict[str, Any] = None):
+
+        self.metrics = {
+            'CONSUME_TIME': consumer_time_metric(svc_name),
+            'CONSUME_COUNT': consumer_count_metric(svc_name)
+        }
 
         self.closed = False
         self._input_topic = input_topic
@@ -137,8 +142,9 @@ class Consumer(object):
             batch_size = len(messages)
             start_ms = time.time() * 1000
             log.debug('[%(batch_ref)s] Starting processing batch of %(batch)d messages.',
-                     {'batch_ref': format_batch_ref(batch_ref), 'batch': batch_size})
+                      {'batch_ref': format_batch_ref(batch_ref), 'batch': batch_size})
 
+            start_s = time.perf_counter()
             try:
                 func_handler(messages)
 
@@ -149,6 +155,9 @@ class Consumer(object):
             else:
                 if self._auto_commit:
                     self._consumer.commit()
+
+            self.metrics['CONSUME_TIME'].observe(time.perf_counter() - start_s)
+            self.metrics['CONSUME_COUNT'].inc(len(messages))
 
             messages_processed += batch_size
 
