@@ -1,5 +1,6 @@
 import logging
 import itertools
+import re
 import time
 from collections import namedtuple
 from typing import List, Dict, Any
@@ -51,9 +52,11 @@ class Consumer(object):
     def __init__(self, svc_name: str, kafka_bootstrap_servers: List[str], input_topic: str, consumer_group: str,
                  batch_size: int, consumer_timeout_ms: int, commit_message: bool = True, kafka_consumer_config: Dict[str, Any] = None):
 
+        # metric names can only contain word chars, so replace non-word chars with an underscore
+        metric_svc_name = re.sub(r'\W', '_', svc_name)
         self.metrics = {
-            'CONSUME_TIME': consumer_time_metric(svc_name),
-            'CONSUME_COUNT': consumer_count_metric(svc_name)
+            'CONSUME_TIME': consumer_time_metric(metric_svc_name),
+            'CONSUME_COUNT': consumer_count_metric(metric_svc_name)
         }
 
         self.closed = False
@@ -165,7 +168,7 @@ class Consumer(object):
                 end_ms = time.time() * 1000
                 time_ms = end_ms - start_ms
                 log.debug('Processed batch of %(batch)d messages in %(time_ms)dms. %(total)d total.',
-                         {'batch': batch_size, 'time_ms': time_ms, 'total': messages_processed})
+                          {'batch': batch_size, 'time_ms': time_ms, 'total': messages_processed})
 
         if messages_processed > 0:
             log.debug('Processed %(total)d messages', {'total': messages_processed})
