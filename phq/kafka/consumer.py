@@ -104,7 +104,7 @@ class Consumer(object):
 
                     payload, ref = unpack_kafka_payload(message)
                     message_id = ref['key']
-                    messages.append(Message(message_id, payload, ref))
+                    messages.append(Message(message_id, payload, ref, topic))
 
                 batch_ref[topic][partition] = (batch[0].offset(), batch[-1].offset())
 
