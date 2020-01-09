@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 class Message:
     id: str
     payload: Dict[str, Any]
-    ref: Union[Dict[str, Any], List[Dict[str, Any]]]
+    ref: Union[Dict[str, Any], List[Dict[str, Any]]] = None
     topic: str = None
 
 
