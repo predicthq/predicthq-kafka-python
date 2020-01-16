@@ -2,7 +2,7 @@ import logging
 import itertools
 import time
 from collections import namedtuple
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 
 import confluent_kafka
 
@@ -48,7 +48,7 @@ def _group_messages(messages):
 
 
 class Consumer(object):
-    def __init__(self, svc_name: str, kafka_bootstrap_servers: List[str], input_topic: str, consumer_group: str,
+    def __init__(self, svc_name: str, kafka_bootstrap_servers: List[str], input_topics: Union[str, List[str]], consumer_group: str,
                  batch_size: int, consumer_timeout_ms: int, commit_message: bool = True, kafka_consumer_config: Dict[str, Any] = None):
 
         self.metrics = {
@@ -57,7 +57,9 @@ class Consumer(object):
         }
 
         self.closed = False
-        self._input_topic = input_topic
+
+        # use to accept either a single topic or a list of topics
+        self._input_topics = input_topics if isinstance(input_topics, (list,)) else [input_topics]
         self._consumer_group = consumer_group
         self._auto_commit = commit_message
 
@@ -74,7 +76,7 @@ class Consumer(object):
                                             self._consumer_group,
                                             kafka_consumer_config)
 
-        self._consumer.subscribe([self._input_topic])
+        self._consumer.subscribe(self._input_topics)
 
     def _format_message_batch(self, kafka_messages):
         messages = []
@@ -83,7 +85,7 @@ class Consumer(object):
             topic = tp.topic
             partition = tp.partition
 
-            if not topic or topic == self._input_topic:
+            if not topic or topic in self._input_topics:
                 if topic not in batch_ref:
                     batch_ref[topic] = {}
 
@@ -104,13 +106,13 @@ class Consumer(object):
 
                     payload, ref = unpack_kafka_payload(message)
                     message_id = ref['key']
-                    messages.append(Message(message_id, payload, ref))
+                    messages.append(Message(message_id, payload, ref, topic))
 
                 batch_ref[topic][partition] = (batch[0].offset(), batch[-1].offset())
 
             else:
-                log.warning('Received %(batch)s messages for unknown topic %(unknown_topic)s (expected %(expected_topic)s). Skipping.',
-                            {'batch': len(batch), 'unknown_topic': topic, 'expected_topic': self._input_topic})
+                log.warning('Received %(batch)s messages for unknown topic %(unknown_topic)s (expected %(expected_topics)s). Skipping.',
+                            {'batch': len(batch), 'unknown_topic': topic, 'expected_topics': self._input_topics})
                 continue
 
         return messages, batch_ref

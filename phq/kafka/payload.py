@@ -1,12 +1,20 @@
 from collections import namedtuple
 import json
 import logging
+from typing import Dict, List, Any, Union
 
 import rfc3339
+from dataclasses import dataclass
 
 log = logging.getLogger(__name__)
 
-Message = namedtuple('Message', ['id', 'payload', 'ref'])
+
+@dataclass(frozen=True)
+class Message:
+    id: str
+    payload: Dict[str, Any]
+    ref: Union[Dict[str, Any], List[Dict[str, Any]]] = None
+    topic: str = None
 
 
 def _long_hist(hist, depth=0, max_depth=100):
