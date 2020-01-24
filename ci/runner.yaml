@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+    - name: python-ci
+      image: harbor.int.phq.io/predicthq/python:3.6.8-stretch-slim
+      tty: true
