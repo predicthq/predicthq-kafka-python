@@ -76,7 +76,7 @@ my_consumer = Consumer('my_svc_name', ['kafka:9092'], 'input-topic', 'group_id',
 my_consumer.process(process_messages)
 ```
 
-In a situation when multiple versions of the same message are being returned within the same batch, the consumer `process()` can be tweaked to process only the last version of the message and ignore the previous ones by setting the optional `latest_only` parameter to `True`.
+In a situation when multiple versions of the same message are being processed within the same batch, the consumer `process()` can be tweaked to process only the last version of the message and ignore the older ones by setting the optional `latest_only` parameter to `True`.
 
 ```python
 my_consumer = Consumer('my_svc_name', ['kafka:9092'], 'input-topic', 'group_id', batch_size, consumer_timeout_ms)

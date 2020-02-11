@@ -1,4 +1,4 @@
-## Version 0.1.12
+## Version 0.1.13
 * CHANGE: Introduce latest_only parameter in Consumer.process() to ignore older version of Kafka messages that appear multiple times in a single batch. 
 
 ## Version 0.1.12
