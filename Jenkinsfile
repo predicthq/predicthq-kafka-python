@@ -8,6 +8,15 @@ pipeline {
     }
   }
   stages {
+     stage('Run tests') {
+      steps {
+        container(name: 'python-ci', shell: '/bin/bash') {
+          sh """#!/bin/bash
+          ${env.WORKSPACE}/scripts/test.sh
+          """
+        }
+      }
+    }
     stage('Push to PHQ pypi') {
       when {
         branch 'master'
