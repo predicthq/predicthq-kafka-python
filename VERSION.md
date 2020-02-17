@@ -1,3 +1,6 @@
+## Version 0.1.13
+* CHANGE: Introduce latest_only parameter in Consumer.process() to ignore older version of Kafka messages that appear multiple times in a single batch. 
+
 ## Version 0.1.12
 * FIX: Consumer now attempts to reuse the existing Prometheus metrics that have been previously created instead of keep creating new ones. 
 

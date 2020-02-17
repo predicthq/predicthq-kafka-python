@@ -1,8 +1,7 @@
 from setuptools import setup, find_namespace_packages
 
-with open('requirements.txt') as f:
+with open('requirements/base.txt') as f:
     requirements = f.read().splitlines()
-
 
 with open('README.md') as f:
     readme = f.read()

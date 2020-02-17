@@ -1,7 +1,7 @@
 import logging
 import itertools
 import time
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 from typing import List, Dict, Any, Union
 
 import confluent_kafka
@@ -45,6 +45,14 @@ def _group_messages(messages):
                 batch_ref[tp] = []
             batch_ref[tp] += list(m_partition)
     return batch_ref
+
+
+def _latest_distinct_messages(messages):
+    latest_distinct_msgs = OrderedDict()
+    for msg in messages[::-1]:
+        if msg.id not in latest_distinct_msgs:
+            latest_distinct_msgs[msg.id] = msg
+    return list(latest_distinct_msgs.values())[::-1]
 
 
 class Consumer(object):
@@ -131,7 +139,7 @@ class Consumer(object):
             self._consumer.close()
             self.closed = True
 
-    def process(self, func_handler):
+    def process(self, func_handler, latest_only=False):
         if not callable(func_handler):
             raise ValueError(f'Function handler is expected but got {type(func_handler)}')
 
@@ -148,8 +156,10 @@ class Consumer(object):
 
             start_s = time.perf_counter()
             try:
-                func_handler(messages)
+                if latest_only:
+                    messages = _latest_distinct_messages(messages)
 
+                func_handler(_latest_distinct_messages(messages) if latest_only else messages)
             except Exception as e:
                 log.exception('[%(batch_ref)s] Encountered exception while processing batch of messages.',
                               {'batch_ref': format_batch_ref(batch_ref)})
