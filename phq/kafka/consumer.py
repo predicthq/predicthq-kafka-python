@@ -159,7 +159,7 @@ class Consumer(object):
                 if latest_only:
                     messages = _latest_distinct_messages(messages)
 
-                func_handler(messages)
+                func_handler(_latest_distinct_messages(messages) if latest_only else messages)
             except Exception as e:
                 log.exception('[%(batch_ref)s] Encountered exception while processing batch of messages.',
                               {'batch_ref': format_batch_ref(batch_ref)})
