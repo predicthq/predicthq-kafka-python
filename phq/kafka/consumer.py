@@ -136,6 +136,7 @@ class Consumer(object):
 
     def close(self):
         if not self.closed:
+            log.debug('Closing Kafka consumer.')
             self._consumer.close()
             self.closed = True
 
@@ -166,6 +167,7 @@ class Consumer(object):
                 raise
             else:
                 if self._auto_commit:
+                    log.debug('Committing Kafka offset.')
                     self._consumer.commit()
 
             self.metrics['CONSUME_TIME'].observe(time.perf_counter() - start_s)
